@@ -3,6 +3,7 @@ const express = require('express');
 const path = require("path");
 const cors = require('cors');
 const app = express();
+const mongoose = require('mongoose');
 const { argv } = require('process');
 
 // Load env
@@ -14,6 +15,8 @@ const PORT = parseInt(process.env.APP_PORT || "3000", 10);
 const HOSTNAME = process.env.APP_HOSTNAME;
 
 app.use(cors());
+app.use(express.json({limit: '50mb'})); // To parse body
+
 // error handler
 app.use((err, req, res, next) => {
 	if (err) {
@@ -29,6 +32,9 @@ app.use("/api", require('./router'));
 
 app.set("port", PORT);
 const server = require('http').createServer(app);
-server.listen(PORT, HOSTNAME, (req, res) => {
-    console.log(`Server running on http://${HOSTNAME}:${PORT}`);
-  });
+
+mongoose.connect(process.env.MONGO_URL, { useNewUrlParser: true, useUnifiedTopology: true }).then(
+	server.listen(PORT, HOSTNAME, (req, res) => {
+		console.log(`Server running on http://${HOSTNAME}:${PORT}`);
+	})
+);
