@@ -4,14 +4,16 @@ const AcademicYears = require("../models/academicYears");
 const handlers = {
   getDepts: async (req, res) => {
     try {
-      console.log(req.year_id);
       const data = await depts
-        .find({ year_id: req.headers["year_id"], status: 1 }, { dept_name: 1, _id: 1 })
+        .find(
+          { year_id: req.headers["year_id"], status: 1 },
+          { dept_name: 1, _id: 1 }
+        )
         .lean();
       return res.status(200).json({
         status: 200,
         message: "Departments fetched successfully",
-        data: data,
+        data: { depts: data },
       });
     } catch (error) {
       console.log(error);
@@ -32,7 +34,7 @@ const handlers = {
 
       if (!!dataExists)
         return res.status(200).json({
-          status: 200,
+          status: 400,
           message: "Department already exists",
           data: {},
         });
@@ -45,8 +47,8 @@ const handlers = {
 
       return res.status(200).json({
         status: 200,
-        message: "Departments added successfully",
-        data: data,
+        message: "Department added successfully",
+        data: { dept: data },
       });
     } catch (error) {
       console.log(error);
@@ -63,7 +65,7 @@ const handlers = {
       ).lean();
 
       data.sort(function (a, b) {
-        return a.start_year - b.start_year;
+        return b.start_year - a.start_year;
       });
       data = data.map((year) => {
         return {
@@ -75,7 +77,7 @@ const handlers = {
       return res.status(200).json({
         status: 200,
         message: "Years fetched successfully",
-        data: data,
+        data: { years: data },
       });
     } catch (error) {
       console.log(error);
@@ -96,7 +98,7 @@ const handlers = {
 
       if (!!dataExists)
         return res.status(200).json({
-          status: 200,
+          status: 400,
           message: "year already exists",
           data: {},
         });
@@ -109,7 +111,7 @@ const handlers = {
       return res.status(200).json({
         status: 200,
         message: "Year added successfully",
-        data: data,
+        data: { year: data },
       });
     } catch (error) {
       console.log(error);

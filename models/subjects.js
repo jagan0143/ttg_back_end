@@ -1,18 +1,26 @@
 const mongoose = require("mongoose");
 const { Schema } = mongoose;
 
-const dept_schema = new Schema(
+const subject_schema = new Schema(
   {
-    dept_name: {
+    sub_code: {
       type: String,
       required: true,
     },
-    dept_code: {
+    sub_name: {
       type: String,
       required: true,
     },
     year_id: {
       type: String,
+      required: true,
+    },
+    dept_id: {
+      type: String,
+      required: true,
+    },
+    total_hrs: {
+      type: Number,
       required: true,
     },
     status: {
@@ -21,8 +29,8 @@ const dept_schema = new Schema(
     },
   },
   {
-    timestamps: true
+    timestamps: true,
   }
 );
 
-module.exports = mongoose.model("department", dept_schema);
+module.exports = mongoose.model("subject", subject_schema);

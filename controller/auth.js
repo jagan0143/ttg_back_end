@@ -6,7 +6,7 @@ module.exports = {
       const year_id = req.headers["year_id"];
       if (!year_id)
         return res.status(200).json({
-          status: 200,
+          status: 400,
           message: "Acadamic year auth failed",
           data: {},
         });
@@ -18,7 +18,7 @@ module.exports = {
 
       if (!data)
         return res.status(200).json({
-          status: 200,
+          status: 400,
           message: "Acadamic year auth failed",
           data: {},
         });

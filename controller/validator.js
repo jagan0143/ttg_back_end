@@ -37,4 +37,55 @@ module.exports = {
       });
     else next();
   },
+  addSub: (req, res, next) => {
+    const schema = Joi.object({
+      sub_code: Joi.string().required(),
+      sub_name: Joi.string().required(),
+      dept_id: Joi.string().required(),
+      total_hrs: Joi.number().required()
+    }).options({ allowUnknown: false });
+
+    const { error } = schema.validate(req.body);
+    if (error)
+      return res.status(200).json({
+        status: 400,
+        message: error.details[0].message.replace(/\"/g, ""),
+        data: {},
+      });
+    else next();
+  },
+  addClass: (req, res, next) => {
+    const schema = Joi.object({
+      class_code: Joi.string().required(),
+      class_name: Joi.string().required(),
+      dept_id: Joi.string().required()
+    }).options({ allowUnknown: false });
+
+    const { error } = schema.validate(req.body);
+    if (error)
+      return res.status(200).json({
+        status: 400,
+        message: error.details[0].message.replace(/\"/g, ""),
+        data: {},
+      });
+    else next();
+  },
+  addTeachers: (req, res, next) => {
+    const schema = Joi.object({
+      teacher_code: Joi.string().required(),
+      teacher_name: Joi.string().required(),
+      class_id: Joi.string().required(),
+      dept_id: Joi.string().required(),
+      subject_id: Joi.string().required()
+    }).options({ allowUnknown: false });
+
+    const { error } = schema.validate(req.body);
+    if (error)
+      return res.status(200).json({
+        status: 400,
+        message: error.details[0].message.replace(/\"/g, ""),
+        data: {},
+      });
+    else next();
+  }
 };

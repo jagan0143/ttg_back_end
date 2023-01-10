@@ -1,17 +1,17 @@
 const mongoose = require("mongoose");
 const { Schema } = mongoose;
 
-const dept_schema = new Schema(
+const allocations_schema = new Schema(
   {
-    dept_name: {
+    class_id: {
       type: String,
       required: true,
     },
-    dept_code: {
+    subject_id: {
       type: String,
       required: true,
     },
-    year_id: {
+    teacher_id: {
       type: String,
       required: true,
     },
@@ -21,8 +21,8 @@ const dept_schema = new Schema(
     },
   },
   {
-    timestamps: true
+    timestamps: true,
   }
 );
 
-module.exports = mongoose.model("department", dept_schema);
+module.exports = mongoose.model("allocation", allocations_schema);
