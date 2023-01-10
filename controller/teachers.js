@@ -78,6 +78,34 @@ const handlers = {
             as: "dept",
           },
         },
+        {
+          $lookup: {
+            from: "classes",
+            let: { searchId: { $toObjectId: "$class_id" } },
+            //localField: "$$searchId",
+            //foreignField: "_id",
+            pipeline: [
+              { $match: { $expr: { $eq: ["$_id", "$$searchId"] } } },
+              { $project: { _id: 1, class_name: 1 } },
+              { $limit: 1 },
+            ],
+            as: "class_name",
+          },
+        },
+        {
+          $lookup: {
+            from: "subjects",
+            let: { searchId: { $toObjectId: "$subject_id" } },
+            //localField: "$$searchId",
+            //foreignField: "_id",
+            pipeline: [
+              { $match: { $expr: { $eq: ["$_id", "$$searchId"] } } },
+              { $project: { _id: 1, sub_name: 1 } },
+              { $limit: 1 },
+            ],
+            as: "subject",
+          },
+        },
         { $skip: (page - 1) * chunk },
         { $limit: chunk * 1 },
         { $sort: { updatedAt: -1 } },
@@ -87,10 +115,14 @@ const handlers = {
             teacher_name: 1,
             teacher_code: 1,
             department: {
-              $first: "$dept.dept_name",
+              $ifNull: [{$first: "$dept.dept_name"}, "----"],
             },
-            class_id: 1,
-            subject_id: 1,
+            class_name: {
+              $ifNull: [{$first: "$class_name.class_name"}, "----"],
+            },
+            subject_name:{
+              $ifNull: [{$first: "$subject.sub_name"}, "----"],
+            },
             status: 1,
           },
         },

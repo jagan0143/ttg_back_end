@@ -1,4 +1,5 @@
 const Subjects = require("../models/subjects");
+const Teachers = require("../models/teachers");
 
 const handlers = {
   addSubject: async (req, res) => {
@@ -84,7 +85,7 @@ const handlers = {
             sub_name: 1,
             sub_code: 1,
             department: {
-              $first: "$dept.dept_name",
+              $ifNull: [{ $first: "$dept.dept_name" }, "----"],
             },
             total_hrs: 1,
             status: 1,
@@ -106,12 +107,12 @@ const handlers = {
   },
   getSubs: async (req, res) => {
     try {
-      let { dept_id } = req.query;
+      let { dept_id, class_id } = req.query;
 
-      if (!dept_id)
+      if (!dept_id || !class_id)
         return res.status(200).json({
           status: 400,
-          message: "Department Id is required in query!",
+          message: "Query param missing!",
           data: {},
         });
       let filterQuery = {
@@ -120,12 +121,22 @@ const handlers = {
       filterQuery.dept_id = dept_id;
       filterQuery.status = { $in: [1] };
 
-      let data = await Subjects.find(filterQuery, "_id sub_name").sort({ updatedAt: -1 });
-
+      let data1 = await Subjects.find(filterQuery, "_id sub_name").sort({
+        updatedAt: -1,
+      });
+      filterQuery.class_id = class_id;
+      let data2 = await Teachers.find(filterQuery, "_id subject_id").sort({
+        updatedAt: -1,
+      });
+      let data3 = data1.filter((element1) => {
+        return data2.every((element2) => {
+          return element1._id != element2.subject_id;
+        });
+      });
       return res.status(200).json({
         status: 200,
         message: "Subjects fetched successfully",
-        data: { subjects: data },
+        data: { subjects: data3 },
       });
     } catch (error) {
       console.log(error);

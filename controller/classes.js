@@ -84,7 +84,7 @@ const handlers = {
             class_name: 1,
             class_code: 1,
             department: {
-              $first: "$dept.dept_name",
+              $ifNull: [{ $first: "$dept.dept_name" }, "----"],
             },
             status: 1,
           },
