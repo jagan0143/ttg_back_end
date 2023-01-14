@@ -44,8 +44,8 @@ const handlers = {
     } catch (error) {
       console.log(error);
       return res
-        .status(400)
-        .json({ status: 400, message: "Internal server error", data: {} });
+        .status(500)
+        .json({ status: 500, message: "Internal server error", data: {} });
     }
   },
   listClasses: async (req, res) => {
@@ -110,8 +110,8 @@ const handlers = {
     } catch (error) {
       console.log(error);
       return res
-        .status(200)
-        .json({ status: 400, message: "Internal server error", data: {} });
+        .status(500)
+        .json({ status: 500, message: "Internal server error", data: {} });
     }
   },
   getClasses: async (req, res) => {
@@ -142,8 +142,8 @@ const handlers = {
     } catch (error) {
       console.log(error);
       return res
-        .status(200)
-        .json({ status: 400, message: "Internal server error", data: {} });
+        .status(500)
+        .json({ status: 500, message: "Internal server error", data: {} });
     }
   },
 };
