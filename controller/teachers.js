@@ -26,7 +26,7 @@ const handlers = {
         },
         { teacher_name: 1, _id: 1 }
       ).lean();
-      
+
       if (!!dataExists)
         return res.status(200).json({
           status: 200,
@@ -37,7 +37,7 @@ const handlers = {
       const data = await new Teachers({
         ...newData,
         year_id: req.headers["year_id"],
-        status: 1
+        status: 1,
       }).save();
       return res.status(200).json({
         status: 200,
@@ -60,7 +60,7 @@ const handlers = {
       if (dept_id) filterQuery.dept_id = dept_id;
       filterQuery.status = { $in: [1] };
       if (page < 1) page = 1;
-      if (chunk < 10) chunk = 10;
+      if (chunk < 5) chunk = 5;
 
       let data = await Teachers.aggregate([
         { $match: filterQuery },
@@ -115,23 +115,36 @@ const handlers = {
             teacher_name: 1,
             teacher_code: 1,
             department: {
-              $ifNull: [{$first: "$dept.dept_name"}, "----"],
+              $ifNull: [{ $first: "$dept.dept_name" }, "----"],
             },
             class_name: {
-              $ifNull: [{$first: "$class_name.class_name"}, "----"],
+              $ifNull: [{ $first: "$class_name.class_name" }, "----"],
             },
-            subject_name:{
-              $ifNull: [{$first: "$subject.sub_name"}, "----"],
+            subject_name: {
+              $ifNull: [{ $first: "$subject.sub_name" }, "----"],
             },
             status: 1,
           },
         },
       ]);
 
+      let count = await Teachers.aggregate([
+        { $match: filterQuery },
+        { $count: "totalCount" },
+      ]);
+
       return res.status(200).json({
         status: 200,
         message: "Teachers fetched successfully",
-        data: { teachers: data },
+        data: {
+          teachers: data,
+          pageMeta: {
+            page: page * 1,
+            chunk: chunk * 1,
+            totalCount: count[0].totalCount,
+            totalPage: Math.ceil(count[0].totalCount / chunk),
+          },
+        },
       });
     } catch (error) {
       console.log(error);

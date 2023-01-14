@@ -57,7 +57,7 @@ const handlers = {
       if (dept_id) filterQuery.dept_id = dept_id;
       filterQuery.status = { $in: [1] };
       if (page < 1) page = 1;
-      if (chunk < 10) chunk = 10;
+      if (chunk < 5) chunk = 5;
 
       let data = await Classes.aggregate([
         { $match: filterQuery },
@@ -90,11 +90,22 @@ const handlers = {
           },
         },
       ]);
-
+      let count = await Classes.aggregate([
+        { $match: filterQuery },
+        { $count: "totalCount" },
+      ]);
       return res.status(200).json({
         status: 200,
         message: "classes fetched successfully",
-        data: { classes: data },
+        data: {
+          classes: data,
+          pageMeta: {
+            page: page * 1,
+            chunk: chunk * 1,
+            totalCount: count[0].totalCount,
+            totalPage: Math.ceil(count[0].totalCount / chunk),
+          },
+        },
       });
     } catch (error) {
       console.log(error);
