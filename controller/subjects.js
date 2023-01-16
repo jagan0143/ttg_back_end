@@ -56,7 +56,7 @@ const handlers = {
         year_id: req.headers["year_id"],
       };
       if (dept_id) filterQuery.dept_id = dept_id;
-      filterQuery.status = { $in: [1] };
+      filterQuery.status = { $in: [1, 2] };
       if (page < 1) page = 1;
       if (chunk < 5) chunk = 5;
 
@@ -92,10 +92,11 @@ const handlers = {
           },
         },
       ]);
-      let count = await Subjects.aggregate([
-        { $match: filterQuery },
-        { $count: "totalCount" },
-      ]);
+      // let count = await Subjects.aggregate([
+      //   { $match: filterQuery },
+      //   { $count: "totalCount" },
+      // ]);
+      let count = await Subjects.find(filterQuery).count();
 
       return res.status(200).json({
         status: 200,
@@ -105,8 +106,8 @@ const handlers = {
           pageMeta: {
             page: page * 1,
             chunk: chunk * 1,
-            totalCount: count[0].totalCount,
-            totalPage: Math.ceil(count[0].totalCount / chunk),
+            totalCount: count,
+            totalPage: Math.ceil(count / chunk),
           },
         },
       });
