@@ -55,7 +55,7 @@ const handlers = {
       let filterQuery = {
         year_id: req.headers["year_id"],
       };
-      if (dept_id) filterQuery.dept_id = dept_id;
+      if (dept_id && dept_id != "all") filterQuery.dept_id = dept_id;
       filterQuery.status = { $in: [1, 2] };
       if (page < 1) page = 1;
       if (chunk < 5) chunk = 5;
