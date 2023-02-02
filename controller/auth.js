@@ -24,6 +24,8 @@ module.exports = {
         });
 
       req.year_id = year_id;
+      req.start_year = data.start_year;
+      req.end_year = data.end_year;
       next();
     } catch (error) {
       console.log(error);

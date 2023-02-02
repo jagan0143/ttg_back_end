@@ -25,7 +25,6 @@ baseRouter.post(
 baseRouter.get("/listSubjects", auth.checkforYear, subjects.listSubjects);
 baseRouter.get("/subDropdown", auth.checkforYear, subjects.getSubs);
 
-
 // class management
 const classes = require("./controller/classes");
 baseRouter.post(
@@ -47,6 +46,38 @@ baseRouter.post(
 );
 baseRouter.get("/listTeachers", auth.checkforYear, teachers.listTeachers);
 
+// Teacher management
+const academicCalendar = require("./controller/academicCalendar");
+baseRouter.post(
+  "/addCalendar",
+  auth.checkforYear,
+  validator.addCalendar,
+  academicCalendar.addCalendar
+);
+baseRouter.get(
+  "/listCalendars",
+  auth.checkforYear,
+  academicCalendar.listCalendars
+);
+baseRouter.get(
+  "/listHolidays",
+  auth.checkforYear,
+  validator.checkCalendarId,
+  academicCalendar.listHolidays
+);
+baseRouter.put(
+  "/addHoliday",
+  auth.checkforYear,
+  validator.checkCalendarId,
+  validator.addHoliday,
+  academicCalendar.addHolidays
+);
+baseRouter.delete(
+  "/deleteHoliday",
+  auth.checkforYear,
+  validator.checkCalendarId,
+  academicCalendar.deleteHoliday
+);
 
 baseRouter.use((req, res) =>
   res.status(400).json({ status: 400, message: "Router not found", data: {} })
