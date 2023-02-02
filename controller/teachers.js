@@ -51,6 +51,61 @@ const handlers = {
         .json({ status: 500, message: "Internal server error", data: {} });
     }
   },
+  updateTeacher: async (req, res) => {
+    try {
+      let { teacher_id } = req.query;
+
+      let data = await Teachers.updateOne({ _id: teacher_id }, { ...req.body });
+      if (!(data.acknowledged && data.modifiedCount == 1))
+        return res.status(200).json({
+          status: 400,
+          message: "Database error!",
+          data: {},
+        });
+      return res.status(200).json({
+        status: 200,
+        message: "Teacher updated successfully",
+        data: {},
+      });
+    } catch (error) {
+      console.log(error);
+      return res
+        .status(500)
+        .json({ status: 500, message: "Internal server error", data: {} });
+    }
+  },
+  deleteTeacher: async (req, res) => {
+    try {
+      let { teacher_id } = req.query;
+      if (!teacher_id)
+        return res
+          .status(400)
+          .json({ status: 500, message: "teacher_id required", data: {} });
+
+      let teacherData = await Teachers.updateOne(
+        { _id: teacher_id },
+        { status: 0 }
+      );
+
+      if (!(teacherData.acknowledged && teacherData.modifiedCount >= 1))
+        return res.status(200).json({
+          status: 400,
+          message: "Database error!",
+          data: {},
+        });
+
+      return res.status(200).json({
+        status: 200,
+        message: "Teacher deleted successfully",
+        data: {},
+      });
+    } catch (error) {
+      console.log(error);
+      return res
+        .status(500)
+        .json({ status: 500, message: "Internal server error", data: {} });
+    }
+  },
   listTeachers: async (req, res) => {
     try {
       let { dept_id, page, chunk, search } = req.query;

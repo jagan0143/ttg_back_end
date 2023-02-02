@@ -1,4 +1,5 @@
 const Classes = require("../models/classes");
+const Teachers = require("../models/teachers");
 const handlers = {
   addClass: async (req, res) => {
     try {
@@ -40,6 +41,71 @@ const handlers = {
         status: 200,
         message: "class added successfully",
         data: { class_data: data },
+      });
+    } catch (error) {
+      console.log(error);
+      return res
+        .status(500)
+        .json({ status: 500, message: "Internal server error", data: {} });
+    }
+  },
+  updateClass: async (req, res) => {
+    try {
+      let { class_id } = req.query;
+
+      let data = await Classes.updateOne({ _id: class_id }, { ...req.body });
+      if (!(data.acknowledged && data.modifiedCount == 1))
+        return res.status(200).json({
+          status: 400,
+          message: "Database error!",
+          data: {},
+        });
+      return res.status(200).json({
+        status: 200,
+        message: "Class updated successfully",
+        data: {},
+      });
+    } catch (error) {
+      console.log(error);
+      return res
+        .status(500)
+        .json({ status: 500, message: "Internal server error", data: {} });
+    }
+  },
+  deleteClass: async (req, res) => {
+    try {
+      let { class_id } = req.query;
+      if (!class_id)
+        return res
+          .status(400)
+          .json({ status: 500, message: "class_id required", data: {} });
+
+      let classData = await Classes.updateOne({ _id: class_id }, { status: 0 });
+
+      if (!(classData.acknowledged && classData.modifiedCount == 1))
+        return res.status(200).json({
+          status: 400,
+          message: "Database error!",
+          data: {},
+        });
+
+      // let Data = await Teachers.find({ subject_id: subject_id });
+      // console.log(Data);
+      let teacherData = await Teachers.updateMany(
+        { class_id: class_id },
+        { status: 0 }
+      );
+
+      if (!teacherData.acknowledged)
+        return res.status(200).json({
+          status: 400,
+          message: "Database error!",
+          data: {},
+        });
+      return res.status(200).json({
+        status: 200,
+        message: "Class deleted successfully",
+        data: {},
       });
     } catch (error) {
       console.log(error);

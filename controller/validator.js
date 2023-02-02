@@ -54,11 +54,51 @@ module.exports = {
       });
     else next();
   },
+  updateSub: (req, res, next) => {
+    let { subject_id } = req.query;
+    if (!subject_id)
+      return res
+        .status(400)
+        .json({ status: 500, message: "subject_id required", data: {} });
+
+    const schema = Joi.object({
+      sub_name: Joi.string().required(),
+      total_hrs: Joi.number().integer().min(1).max(250).required(),
+    }).options({ allowUnknown: false });
+
+    const { error } = schema.validate(req.body);
+    if (error)
+      return res.status(200).json({
+        status: 400,
+        message: error.details[0].message.replace(/\"/g, ""),
+        data: {},
+      });
+    else next();
+  },
   addClass: (req, res, next) => {
     const schema = Joi.object({
       class_code: Joi.string().required(),
       class_name: Joi.string().required(),
       dept_id: Joi.string().required(),
+    }).options({ allowUnknown: false });
+
+    const { error } = schema.validate(req.body);
+    if (error)
+      return res.status(200).json({
+        status: 400,
+        message: error.details[0].message.replace(/\"/g, ""),
+        data: {},
+      });
+    else next();
+  },
+  updateClass: (req, res, next) => {
+    let { class_id } = req.query;
+    if (!class_id)
+      return res
+        .status(400)
+        .json({ status: 500, message: "class_id required", data: {} });
+    const schema = Joi.object({
+      class_name: Joi.string().required(),
     }).options({ allowUnknown: false });
 
     const { error } = schema.validate(req.body);
@@ -77,6 +117,26 @@ module.exports = {
       class_id: Joi.string().required(),
       dept_id: Joi.string().required(),
       subject_id: Joi.string().required(),
+    }).options({ allowUnknown: false });
+
+    const { error } = schema.validate(req.body);
+    if (error)
+      return res.status(200).json({
+        status: 400,
+        message: error.details[0].message.replace(/\"/g, ""),
+        data: {},
+      });
+    else next();
+  },
+  updateTeacher: (req, res, next) => {
+    let { teacher_id } = req.query;
+    if (!teacher_id)
+      return res
+        .status(400)
+        .json({ status: 500, message: "teacher_id required", data: {} });
+
+    const schema = Joi.object({
+      teacher_name: Joi.string().required(),
     }).options({ allowUnknown: false });
 
     const { error } = schema.validate(req.body);

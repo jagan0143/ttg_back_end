@@ -49,6 +49,75 @@ const handlers = {
         .json({ status: 500, message: "Internal server error", data: {} });
     }
   },
+  updateSub: async (req, res) => {
+    try {
+      let { subject_id } = req.query;
+
+      let data = await Subjects.updateOne({ _id: subject_id }, { ...req.body });
+      if (!(data.acknowledged && data.modifiedCount == 1))
+        return res.status(200).json({
+          status: 400,
+          message: "Database error!",
+          data: {},
+        });
+      return res.status(200).json({
+        status: 200,
+        message: "Subject updated successfully",
+        data: {},
+      });
+    } catch (error) {
+      console.log(error);
+      return res
+        .status(500)
+        .json({ status: 500, message: "Internal server error", data: {} });
+    }
+  },
+  deleteSub: async (req, res) => {
+    try {
+      let { subject_id } = req.query;
+      if (!subject_id)
+        return res
+          .status(400)
+          .json({ status: 500, message: "subject_id required", data: {} });
+
+      let subjectData = await Subjects.updateOne(
+        { _id: subject_id },
+        { status: 0 }
+      );
+
+      if (!(subjectData.acknowledged && subjectData.modifiedCount == 1))
+        return res.status(200).json({
+          status: 400,
+          message: "Database error!",
+          data: {},
+        });
+
+      // let Data = await Teachers.find({ subject_id: subject_id });
+      // console.log(Data);
+      let teacherData = await Teachers.updateMany(
+        { subject_id: subject_id },
+        { status: 0 }
+      );
+
+      if (!teacherData.acknowledged)
+        return res.status(200).json({
+          status: 400,
+          message: "Database error!",
+          data: {},
+        });
+      return res.status(200).json({
+        status: 200,
+        message: "Subject deleted successfully",
+        data: {},
+      });
+    } catch (error) {
+      console.log(error);
+      return res
+        .status(500)
+        .json({ status: 500, message: "Internal server error", data: {} });
+    }
+  },
+
   listSubjects: async (req, res) => {
     try {
       let { dept_id, page, chunk, search } = req.query;

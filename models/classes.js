@@ -19,11 +19,11 @@ const class_schema = new Schema(
       type: String,
       required: true,
     },
-    subjects: {
-      type: Array,
-      required: true,
-      default: []
-    },
+    // subjects: {
+    //   type: Array,
+    //   required: true,
+    //   default: []
+    // },
     status: {
       type: Number,
       required: true,

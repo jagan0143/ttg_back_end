@@ -22,6 +22,13 @@ baseRouter.post(
   validator.addSub,
   subjects.addSubject
 );
+baseRouter.put(
+  "/editSub",
+  auth.checkforYear,
+  validator.updateSub,
+  subjects.updateSub
+);
+baseRouter.delete("/deleteSub", auth.checkforYear, subjects.deleteSub);
 baseRouter.get("/listSubjects", auth.checkforYear, subjects.listSubjects);
 baseRouter.get("/subDropdown", auth.checkforYear, subjects.getSubs);
 
@@ -33,6 +40,13 @@ baseRouter.post(
   validator.addClass,
   classes.addClass
 );
+baseRouter.put(
+  "/editClass",
+  auth.checkforYear,
+  validator.updateClass,
+  classes.updateClass
+);
+baseRouter.delete("/deleteclass", auth.checkforYear, classes.deleteClass);
 baseRouter.get("/listClasses", auth.checkforYear, classes.listClasses);
 baseRouter.get("/classDropdown", auth.checkforYear, classes.getClasses);
 
@@ -44,6 +58,13 @@ baseRouter.post(
   validator.addTeachers,
   teachers.addTeachers
 );
+baseRouter.put(
+  "/editTeacher",
+  auth.checkforYear,
+  validator.updateTeacher,
+  teachers.updateTeacher
+);
+baseRouter.delete("/deleteTeacher", auth.checkforYear, teachers.deleteTeacher);
 baseRouter.get("/listTeachers", auth.checkforYear, teachers.listTeachers);
 
 // Teacher management
