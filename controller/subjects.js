@@ -126,8 +126,8 @@ const handlers = {
       };
       if (dept_id && dept_id != "all") filterQuery.dept_id = dept_id;
       filterQuery.status = { $in: [1, 2] };
-      if (page < 1) page = 1;
-      if (chunk < 5) chunk = 5;
+      if (!page || page < 1) page = 1;
+      if (!chunk || chunk < 5) chunk = 5;
 
       let data = await Subjects.aggregate([
         { $match: filterQuery },

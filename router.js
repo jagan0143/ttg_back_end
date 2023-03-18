@@ -67,7 +67,7 @@ baseRouter.put(
 baseRouter.delete("/deleteTeacher", auth.checkforYear, teachers.deleteTeacher);
 baseRouter.get("/listTeachers", auth.checkforYear, teachers.listTeachers);
 
-// Teacher management
+// Academic calendar management
 const academicCalendar = require("./controller/academicCalendar");
 baseRouter.post(
   "/addCalendar",
@@ -79,6 +79,11 @@ baseRouter.get(
   "/listCalendars",
   auth.checkforYear,
   academicCalendar.listCalendars
+);
+baseRouter.get(
+  "/viewCalendar",
+  auth.checkforYear,
+  academicCalendar.viewCalendar
 );
 baseRouter.get(
   "/listHolidays",
@@ -99,6 +104,10 @@ baseRouter.delete(
   validator.checkCalendarId,
   academicCalendar.deleteHoliday
 );
+
+// Time Table Generator 
+const timeTable = require('./controller/timeTable');
+baseRouter.get("/listTimeTables", auth.checkforYear, timeTable.listTimeTables);
 
 baseRouter.use((req, res) =>
   res.status(400).json({ status: 400, message: "Router not found", data: {} })

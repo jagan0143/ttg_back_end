@@ -167,8 +167,8 @@ const handlers = {
       };
       //if (dept_id && dept_id != "all") filterQuery.dept_id = dept_id;
       filterQuery.status = { $in: [1, 2] };
-      if (page < 1) page = 1;
-      if (chunk < 5) chunk = 5;
+      if (!page || page < 1) page = 1;
+      if (!chunk || chunk < 5) chunk = 5;
 
       let data = await Calendar.aggregate([
         { $match: filterQuery },
@@ -239,8 +239,8 @@ const handlers = {
       };
       //if (dept_id && dept_id != "all") filterQuery.dept_id = dept_id;
       filterQuery.status = { $in: [1, 2] };
-      if (page < 1) page = 1;
-      if (chunk < 5) chunk = 5;
+      if (!page || page < 1) page = 1;
+      if (!chunk || chunk < 5) chunk = 5;
 
       let data = await Calendar.findOne(filterQuery, {
         _id: 1,
@@ -400,6 +400,47 @@ const handlers = {
         status: 200,
         message: "Holiday updated successfully",
         data: {},
+      });
+    } catch (error) {
+      console.log(error);
+      return res
+        .status(500)
+        .json({ status: 500, message: "Internal server error", data: {} });
+    }
+  },
+  viewCalendar: async (req, res) => {
+    try {
+      const { calendar_id } = req.query;
+      if (!calendar_id)
+        return res.status(200).json({
+          status: 400,
+          message: "calendar_id required!",
+          data: {},
+        });
+
+      let calendarData = await Calendar.findOne(
+        { _id: calendar_id, status: 1 },
+        {
+          _id: 1,
+          dept_id: 1,
+          start_date: 1,
+          end_date: 1,
+          is_all_sunday_leave: 1,
+          total_periods: 1,
+          period_time: 1,
+        }
+      ).lean();
+      if (!calendarData) {
+        return res.status(200).json({
+          status: 400,
+          message: "Calendar not found!",
+          data: {},
+        });
+      }
+      return res.status(200).json({
+        status: 200,
+        message: "Calendar fetched successfully",
+        data: calendarData,
       });
     } catch (error) {
       console.log(error);
