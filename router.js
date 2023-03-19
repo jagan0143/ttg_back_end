@@ -108,6 +108,7 @@ baseRouter.delete(
 // Time Table Generator 
 const timeTable = require('./controller/timeTable');
 baseRouter.get("/listTimeTables", auth.checkforYear, timeTable.listTimeTables);
+baseRouter.get("/generateTimeTable", auth.checkforYear, timeTable.generateTimetable);
 
 baseRouter.use((req, res) =>
   res.status(400).json({ status: 400, message: "Router not found", data: {} })

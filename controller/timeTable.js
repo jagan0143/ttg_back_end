@@ -58,9 +58,9 @@ const handlers = {
       let count = await VerifiedData.find(filterQuery).count();
       return res.status(200).json({
         status: 200,
-        message: "Subjects fetched successfully",
+        message: "Time Tables fetched successfully",
         data: {
-          subjects: verifiedData,
+          timeTables: verifiedData,
           pageMeta: {
             page: page * 1,
             chunk: chunk * 1,
@@ -68,6 +68,24 @@ const handlers = {
             totalPage: Math.ceil(count / chunk),
           },
         },
+      });
+    } catch (error) {
+      console.log(error);
+      return {
+        status: false,
+        msg: `Internal server error while validating dates`,
+      };
+    }
+  },
+  generateTimetable: async (req, res) => {
+    try {
+      let { class_id } = req.query;
+      const verifiedData = await VerifiedData.find({class_id: class_id, status:1}).lean();
+
+      return res.status(200).json({
+        status: 200,
+        message: "Subjects fetched successfully",
+        data: verifiedData,
       });
     } catch (error) {
       console.log(error);
