@@ -168,8 +168,8 @@ module.exports = updateEligibility = async (year_id) => {
         let teacherFilter = [];
         await subjects.forEach((subject) => {
           teacherFilter.push({
-            class_id: element._id,
-            subject_id: subject._id,
+            class_id: element._id.toString(),
+            subject_id: subject._id.toString(),
             status: 1,
           });
           calTotalSubjectHrs = calTotalSubjectHrs + subject.total_hrs;
@@ -199,31 +199,50 @@ module.exports = updateEligibility = async (year_id) => {
 
         let teacherExists = 1;
         let teacherMessage = "";
-        subjects = await subjects.map(async (subject) => {
-          let data = {};
+        let subjectData = [];
+        for (let j = 0; j < subjects.length; j++) {
+          let subject = subjects[j];
           let teacher = await teachers.find((tech) => {
-            if (subject._id == tech.subject_id) {
+            if (subject._id.toString() == tech.subject_id) {
               return true;
             }
           });
+          let totalSubPeriods = 0,
+            subPriority = 0;
+          if (element.calendar) {
+            totalSubPeriods = Math.floor(
+              (subject.total_hrs * 60) / element.calendar.period_time
+            );
+            if (totalSubPeriods > 0)
+              subPriority = Math.ceil(
+                (element.calendar.total_wd * element.calendar.total_periods) /
+                  totalSubPeriods
+              );
+          }
           if (teacher) {
-            return {
+            subjectData.push({
               ...subject,
+              totalSubPeriods: totalSubPeriods,
+              subPriority: subPriority,
               teacher_name: teacher.teacher_name,
               teacher_code: teacher.teacher_code,
               teacher_id: teacher._id,
-            };
+            });
+          } else {
+            teacherExists = 0;
+            teacherMessage = `${subject.sub_name} subject has no teacher`;
+            subjectData.push({
+              ...subject,
+              totalSubPeriods: totalSubPeriods,
+              subPriority: subPriority,
+              teacher_name: null,
+              teacher_code: null,
+              teacher_id: null,
+            });
           }
-          teacherExists = 0;
-          teacherMessage = `${subject.sub_name} subject has no teacher`;
-          return {
-            ...subject,
-            teacher_name: null,
-            teacher_code: null,
-            teacher_id: null,
-          };
-        });
-        eligibilityCheck.subjects = subjects;
+        }
+        //console.log(subjects);
+        eligibilityCheck.subjects = subjectData;
 
         if (teacherExists == 0)
           eligibilityCheck.teacherStatus.message = teacherMessage;
@@ -255,7 +274,7 @@ module.exports = updateEligibility = async (year_id) => {
       eligibilityData.push(eligibilityCheck);
     }
 
-    console.log(eligibilityData[0].subjects);
+    //console.log(eligibilityData[0].subjects);
 
     for (let i = 0; i < eligibilityData.length; i++) {
       await VerifiedData.findOneAndUpdate(
