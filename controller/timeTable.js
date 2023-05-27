@@ -1,5 +1,6 @@
 const moment = require("moment");
 const timeTableEligibilityCheck = require("./timeTableGenerator/eligibilityCheck");
+const { selectSubject } = require("./timeTableGenerator/timeTable.helper");
 const VerifiedData = require("../models/verifiedData");
 const TimeTable = require("../models/timeTable");
 
@@ -7,7 +8,7 @@ const handlers = {
   getTimeTable: async (req, res) => {
     try {
       let { id } = req.query;
-      if(!id){
+      if (!id) {
         return res.status(200).json({
           status: 200,
           message: "Id not found in query",
@@ -18,7 +19,7 @@ const handlers = {
       return res.status(200).json({
         status: 200,
         message: "Subjects fetched successfully",
-        data: timeTableData? timeTableData: {},
+        data: timeTableData ? timeTableData : {},
       });
     } catch (error) {
       console.log(error);
@@ -120,47 +121,34 @@ const handlers = {
 
       let allTimeTables = await TimeTable.find({
         year_id: verifiedData.year_id,
-      }); // Need to remove _id timetable from the list
-      //console.log(allTimeTables);
+      });
+
+      allTimeTables = allTimeTables.filter(x => { return x._id != _id; });
+
       let startDate = verifiedData.calendar.start_date;
       let subjects = verifiedData.subjects;
-      let newTimeTable = [];
-      //console.log(subjects);
+      let newTimeTable = [], highestPeriod = 0;;
 
       for (let i = 0; i < verifiedData.calendar.total_wd; i++) {
-        //for (let i = 0; i < 1; i++) {
         currentDate = moment(startDate, "YYYY-MM-DD").add(i, "d").format("YYYY-MM-DD");
         let dailyAllocation = {
           academicDate: currentDate,
           allocation: [],
         };
 
+        let subject,lastselected,sameSubjectCount = 0;
         for (let j = 0; j < verifiedData.calendar.total_periods; j++) {
-          //for (let j = 0; j < 1; j++) {
           let found = 0,
-            loopLimit = subjects.length,
-            currentLoopCount = 0,
-            totalLoopCount = 0;
-          let subject, lastselected;
+            loopLimit = subjects.length;
 
           for (let k = 0; k < loopLimit; k++) {
-            let subjectIndex = 0,
-              highestPeriod = 0;
-            subjects.forEach((element, index) => {
-              if (
-                (!!subject &&
-                  element._id != subject._id &&
-                  element.totalSubPeriods != 0 &&
-                  element.totalSubPeriods > highestPeriod) ||
-                (element.totalSubPeriods != 0 &&
-                  element.totalSubPeriods > highestPeriod)
-              ) {
-                highestPeriod = element.totalSubPeriods;
-                subjectIndex = index;
-              }
-            });
-            let selectedSubject = subjects[subjectIndex];
-            //console.log(`${k}`, subject);
+            let selectSub = await selectSubject(subjects, subject, highestPeriod, sameSubjectCount)
+            if (!selectSub) {
+              continue;
+            }
+            let subjectIndex = selectSub.subjectIndex;
+            highestPeriod = selectSub.highestPeriod;
+            sameSubjectCount = selectSub.sameSubjectCount
 
             if (allTimeTables.length == 0) {
               found = 1;
@@ -170,7 +158,6 @@ const handlers = {
                 .selectedCount
                 ? subjects[subjectIndex].selectedCount + 1
                 : 1;
-              lastselected = subjects[subjectIndex]._id;
               subject = subjects[subjectIndex];
 
               k = loopLimit;
@@ -182,7 +169,7 @@ const handlers = {
                       tt.academicDate == currentDate &&
                       tt.allocation[j] &&
                       tt.allocation[j].teacher_id ==
-                        subjects[subjectIndex].teacher_id
+                      subjects[subjectIndex].teacher_id
                     ) {
                       return true;
                     }
@@ -197,20 +184,16 @@ const handlers = {
                   .selectedCount
                   ? subjects[subjectIndex].selectedCount + 1
                   : 1;
-                lastselected = subjects[subjectIndex]._id;
                 subject = subjects[subjectIndex];
-                console.log(subjects[subjectIndex]);
                 k = loopLimit;
               }
+              else {
+                //console.log("ssssssssssssssss")
+              }
             }
-            currentLoopCount = currentLoopCount + 1;
+            lastselected = subjects[subjectIndex]._id;
           }
-          //console.log(subject);
-          // delete subject.total_hrs;
-          // delete subject.status;
-          // delete subject.totalSubPeriods;
-          // delete subject.subPriority;
-          // delete subject.selectedCount;
+
           if (found == 1) dailyAllocation.allocation.push({
             sub_code: subject.sub_code,
             sub_name: subject.sub_name,
@@ -218,21 +201,20 @@ const handlers = {
             teacher_code: subject.teacher_code,
             teacher_id: subject.teacher_id
           });
-          if (found == 0 && subject._id) {
-          }
+          // if (found == 0 && subject._id) {
+          // }
         }
         newTimeTable.push(dailyAllocation);
+
         let jobCompleted = subjects.find((element, index) => {
-          console.log(index, element)
           return element.totalSubPeriods > 0;
         });
-        console.log(jobCompleted);
+
+        if (jobCompleted) console.log("==> ", jobCompleted.totalSubPeriods)
         if (!jobCompleted) {
           i = verifiedData.calendar.total_wd;
         }
-        //console.log("==============>",dailyAllocation)
       }
-      console.log("==========================> newTimeTable", newTimeTable);
       await TimeTable.deleteOne({ vd_id: verifiedData._id });
 
       let TimeTableData = {
@@ -244,11 +226,11 @@ const handlers = {
         time_table: newTimeTable,
         status: 1,
       };
-      await new TimeTable(TimeTableData).save();
+      let newTT = await new TimeTable(TimeTableData).save();
       return res.status(200).json({
         status: 200,
         message: "Time Table generated successfully",
-        data: {},
+        data: { _id: newTT._id },
       });
     } catch (error) {
       console.log(error);
